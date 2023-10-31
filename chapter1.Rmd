@@ -1,22 +1,32 @@
 # About the project
 
-*Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you should use R Markdown syntax.*
-
-## Introduction to Open Data Science 2023
-
-I'm doing my PhD in a neuroscience research group where most people are focused on (wet) lab work. However, my own interest is more in data science. My earlier MSc studies introduced me to the basics of **R** but now it's time to take a next step. I am delighted that this kind of course exists. I hope this gives me inspiration, increase and keep up my motivation in this path I have chosen.
+I'm doing my PhD in a neuroscience research group where most people are focused on (wet) lab work. However, my own interest is more in data science. My earlier MSc studies introduced me to the basics of **R** but now it's time to take the next step. I am delighted that this kind of course exists. I hope it gives me inspiration, and increase and keep up my motivation in this path I have chosen.
 
 I found this course originally in *UEF Yammer* last year.
 
-My GitHub IODS-project page: <https://github.com/ainopii/IODS-project>
+------------------------------------------------------------------------
+
+My GitHub project-page: <https://github.com/ainopii/IODS-project>
 
 ```{r}
-# This is a so-called "R chunk" where you can write R code.
 
 date()
 
-
 ```
+## The Exercise Set 1
 
-**R for Health Data Science book and the Exercise Set 1** 
-[How did it work as a "crash course" on modern R tools and using RStudio? Which were your favorite topics? Which topics were most difficult? Some other comments on the book and our new approach of getting started with R Markdown etc.?]{style="color: red;"}
+I find this R Markdown "crash course" as a [funny]{style="color: green;"} and easy way to actively learn to use R. Mostly the content was familiar at least some level.
+
+Some new or forgotten basic tools and issues from the first 4 chapters to pick up:
+
+-   pipe operator: %\>% (Ctrl+Shift+M)
+-   operating with dates & times
+-   different join() -functions (I have used different functions e.g. merge() for this)
+-   reshaping data
+-   the importance of setting appropriate factor levels (instead of having characters) in plotting and statistical tests
+
+I liked Chapter 4 on the **ggplot2** package showing how to create and play with different type of plots in R. Overall, the R for Health Data Science -book and the R Markdown seems to be helpful and easy to follow.  
+
+*It was great to have clear and detailed instructions for each step (such as the PAT issue) needed to get started with the course.*
+
+> to be continued...  

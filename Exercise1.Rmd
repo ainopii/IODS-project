@@ -147,7 +147,7 @@ my_datetime <- "2020-12-01 12:00"
 my_datetime
 
 # error that is explained in the book... (you may put '#' in front of it)
-my_datetime - current_datetime
+#my_datetime - current_datetime
 
 current_datetime %>% class()
 my_datetime %>% class()
@@ -168,7 +168,7 @@ my_datesdiff %>% class()
 ymd_hm("2021-01-02 12:00") + my_datesdiff
 
 # another error challenge here... (again you may put '#' in front of that afterwards)
-560/my_datesdiff
+#560/my_datesdiff
 560/as.numeric(my_datesdiff)
 ```
 
@@ -218,6 +218,7 @@ mean(mydata$sex)
 mean(mydata$var2, na.rm = TRUE)
 
 Sys.time()
+
 ```
 
 ### 2.3.4 Working with objects
@@ -240,12 +241,13 @@ example_sequence
 
 ```{r}
 mean_result <- mean(mydata$var2, na.rm = TRUE)
+mean_result
 ```
 
 ### 2.3.6 Recap: object, function, input, argument
 
 ## 2.4 Pipe - %\>%
-
+# Ctrl+Shift+M %>% 
 ```{r}
 library(tidyverse)
 mydata$var1 %>% mean()
@@ -278,7 +280,7 @@ gbd_short %>%
 ```{r}
 # do you see what is wrong here? (you may fix it or hide it with '#' afterwards)
 gbd_short %>% 
- filter(year = 1995)
+ filter(year == 1995)
 
 gbd_short %>% 
   filter(year == 1995 | year == 2017)
@@ -983,8 +985,10 @@ Look at Figure 4.9 on page <https://argoshare.is.ed.ac.uk/healthyr_book/line-plo
 
 ```{r}
 gapdata %>% 
-  ggplot(aes(x = year, y = lifeExp, group = country)) +
-  geom_line()
+  ggplot(aes(x = year, y = lifeExp, group = country, colour = continent)) +
+  geom_line()+
+  facet_wrap(~continent)+
+    scale_colour_brewer(palette = "Paired")
 ```
 
 Try to transform the above graph following these instructions:
@@ -1016,7 +1020,7 @@ gapdata2007 %>%
 
 gapdata2007 %>% 
   ggplot(aes(x = continent, colour = country)) +
-  geom_bar(fill = NA) +
+  geom_bar(fill=NA) +
   theme(legend.position = "none")
 ```
 
@@ -1035,7 +1039,12 @@ gapdata2007 %>%
 Look at Figure 4.13 on the page <https://argoshare.is.ed.ac.uk/healthyr_book/bar-plots.html> and try to recreate it!
 
 ```{r}
-
+gapdata2007 %>% 
+  filter(continent == "Europe") %>% 
+  ggplot(aes(x = fct_reorder(country, lifeExp), y = lifeExp)) +
+  coord_flip() + 
+  geom_col(fill=NA, colour = "deepskyblue")+
+  theme_classic()
 ```
 
 ## 4.7 Histograms
@@ -1111,6 +1120,37 @@ gapdata2007 %>%
 Try the suggested experiments given on page <https://argoshare.is.ed.ac.uk/healthyr_book/multiple-geoms-multiple-aes.html> with the R code above. (Copy-paste the above code chunk below to experiment with it!)
 
 ## 4.10 All other types of plots
+```{r}
+#1
+gapdata2007 %>% 
+  ggplot(aes(x = continent, y = lifeExp)) +
+  # First geom - boxplot
+  geom_boxplot() +
+  # Second geom - jitter with its own aes(colour = )
+  geom_jitter(aes(colour = continent)) +
+  # Third geom - label, with its own dataset (label_data) and aes(label = )
+  geom_label(aes(label = country))
+
+#2
+gapdata2007 %>% 
+  ggplot(aes(x = continent, y = lifeExp)) +
+  # First geom - boxplot
+  geom_boxplot() +
+  # Second geom - jitter with its own aes(colour = )
+  geom_jitter(aes(colour = continent)) +
+  # Third geom - label, with its own dataset (label_data) and aes(label = )
+  geom_text(data = label_data, aes(label = country))
+
+#3
+gapdata2007 %>% 
+  ggplot(aes(x = continent, y = lifeExp)) +
+  # First geom - boxplot
+  geom_boxplot() +
+  # Second geom - jitter with its own aes(colour = )
+  geom_jitter(aes(colour = continent)) +
+  # Third geom - label, with its own dataset (label_data) and aes(label = )
+  geom_label(data = label_data, aes(label = lifeExp))
+```
 
 ## 4.11 Solutions
 
