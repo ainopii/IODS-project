@@ -2,12 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-<<<<<<< HEAD
-<<<<<<< HEAD
 Exercise1.Rmd
-=======
-.Exercise1.Rmd
->>>>>>> 5f7b9887c4c5b339621a80e0f514567923f873e8
-=======
-
->>>>>>> 47208497298ec14cc45d45e0dab67f1496837c19
+Exercise2.Rmd
