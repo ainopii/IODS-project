@@ -1531,7 +1531,7 @@ ttest_result$p.value # Extracted element of result object
 
 ttest_result$conf.int # Extracted element of result object
 ```
-
+#CONTINUE HERE!
 ### 6.5.3 Paired t-tests
 
 ```{r}
