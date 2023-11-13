@@ -4,7 +4,7 @@
 
 *More information on the data is found here: <https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt>*
 
-During this second week I have got familiar with the basics of linear regression and R-tools for linear regression modelling. Linear regression itself was not any new method for me but this was probably my first regression analysis I have done in R by myself. Plotting functions for graphical overview of the data were new for me, and they are quite useful! Also different plots for exploring the validity of regression models are something to remember.  
+During this second week I have got familiar with the basics of linear regression and R tools/functions for linear regression modelling. Linear regression itself was not any new method for me but this was probably my first regression analysis I have done in R by myself. Plotting functions for graphical overview of the data were new for me, and they are quite useful! Also different plots for exploring the validity of regression models are something to remember.  
 
 In general, linear regression modelling seems to be quite straightforward at least with this kind of "simple" and tidy data.
 
@@ -48,7 +48,7 @@ p1 #show the graphics
 -   Most students are around 20 years old and the age distribution is positively (right-) skewed.
 -   Other variables are quite normally distributed, but "points" is slightly negatively/left skewed in both gender, attitude and deep questions left-skewed, and surf questions slightly right-skewed in males.
 -   There are some outliers in attitude (males), deep, and points (females). As the age distribution is so wide and skewed, there seem to be statistical (not true) outliers in age.
--   There are some statistically significant correlations between
+-   There are some statistically significant correlations between (all * are not visible in the matrix as I wasn't able to fix the font properly, sorry!)
     -   Attitude and surf in males (neg.)
     -   Attitude and total points overall and separately in both genders (pos.)
     -   Deep and surf in males and overall (neg., not separately in females)
@@ -78,11 +78,11 @@ summary(my_model1)
 
 In this linear regression model the exam points are explained by three variables: attitude, points of Strategic approach and Surface approach.
 
-The intercept refers the value of *y* when *x* = 0. The values below ("Estimate") means the slopes of the each parallel fitted line for each explanatory variable. The asterisk (\*) shows statistically significant (p\< 0.05) relationships.
+The intercept refers the value of *y* when *x* = 0. When there are multiple explanatory variable, it is the mean value of response variable when all x = 0. The values below ("Estimate") means the slopes of the each parallel fitted line for each explanatory variable. Values >0 refers positive relationship and <0 negative relationship. E.g. higher points in attitude increases the predicted amount of points in the exam. The asterisk (\*) shows statistically significant (p\< 0.05) relationships.
 
 The residual standard error is the standard deviation of the residuals referring the distance between each observation and the fitted line.
 
-Multiple R-squared and Adjusted R-squared are (multiple) correlation coefficients between the variables measuring the linear correlation between explanatory and dependent variables. The adjusted R-squared is a modified version of R-squared that adjusts for the number of predictors in a regression model.
+Multiple R-squared and Adjusted R-squared are (multiple) correlation coefficients measuring the linear correlation between explanatory and dependent variables. The adjusted R-squared is a modified version of R-squared that adjusts for the number of predictors in a regression model.
 
 R-squared means how much (a proportion) the explanatory variables in this model can explain the variance of the outcome variable, which is here the exam points. R-squared can range from 0 to 1. R-squared 1 means that 100 % of the variance seen in the outcome variable can be explained by the explanatory variables. Thus, in the model1 three explanatory variables explain app. 19 % of the total exam points.
 
@@ -99,7 +99,7 @@ summary(my_model2)
 
 ## Model 2
 
-As the parameters in the model2 compared to the model 1 are quite similar, we can conclude that in both models attitude is the main explanatory variable predicting the exam points. However, it has only a minor role in the outcome (points) and the model is not very useful for prediction. There seems to be unknown variables that mostly effect the success in the exam.
+As the parameters in the model2 compared to the model 1 are quite similar, we can conclude that in both models attitude is the main explanatory variable predicting the exam points. However, it has only quite a minor role in the outcome (points) and the model is not very useful for prediction. There seems to be unknown variables that mostly effect the success in the exam.
 
 The R-squared values are slightly lower in the models 2. This is due to the fact that adding a new predictor variable to the model the R-squared will increase even if the predictor variable isn't useful  (ref: <https://www.statology.org/multiple-r-vs-r-squared/>).
 
@@ -107,12 +107,14 @@ The R-squared values are slightly lower in the models 2. This is due to the fact
 # We can also plot the new model:
 library(ggplot2)
 
-ggplot(lrn14, aes(attitude, points))+
+p2 <- ggplot(lrn14, aes(attitude, points))+
   geom_point()+
   geom_smooth(method = "lm", se=FALSE)+
   theme_bw()+
   annotate("text", x=45, y=16, label="Adj. R^2: 0.1856")+
   annotate("text", x=45, y=14, label= "p-value: 4.119e-09")
+
+p2
 ```
 
 ```{r}
