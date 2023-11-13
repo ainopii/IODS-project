@@ -1,13 +1,150 @@
-# Insert chapter 2 title here
+# Linear regression modelling
 
-*Describe the work you have done this week and summarize your learning.*
+*This chapter includes the basics of linear regression modelling using a dataset of international survey results of Approaches to Learning.*
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using.
+*More information on the data is found here: <https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt>*
+
+During this second week I have got familiar with the basics of linear regression and R-tools for linear regression modelling. Linear regression itself was not any new method for me but this was probably my first regression analysis I have done in R by myself. Plotting functions for graphical overview of the data were new for me, and they are quite useful! Also different plots for exploring the validity of regression models are something to remember.  
+
+In general, linear regression modelling seems to be quite straightforward at least with this kind of "simple" and tidy data.
 
 ```{r}
 date()
 ```
 
-Here we go again...
+Here we go again... :)
+
+```{r}
+# 1. Reading the data (csv) for analysis from the local folder.
+
+lrn14 <- read.csv("C:/Users/ainopii/Documents/IODS/IODS-project/data//learning2014_tidy.csv", sep = ",", header = TRUE)
+
+dim(lrn14)
+str(lrn14)
+```
+
+This dataset consists of some results of a survey based on the ASSIST (Approaches and Study Skills Inventory for Students) and background variables (gender and age) of the participants.
+
+The data frame **lrn14** contains 166 rows (observations) and 7 columns (variables).
+
+*Gender* is a character variable with values "F" (female) and "M" (male). Other variables are numeric values.
+
+```{r}
+# 2. Show a graphical overview of the data.
+
+library(GGally)
+library(ggplot2)
+
+p1 <- ggpairs(lrn14, mapping = aes(col = gender, alpha = 0.4), 
+              lower = list(combo = wrap("facethist", bins = 20)),
+              title = "Scatterplot matrix of lrn14")
+
+p1 #show the graphics
+
+```
+
+-   The number of males (blue) is app. half of the number of females (red).
+    -   The total number of females is 110 and 56 for males (see the code below).
+-   Most students are around 20 years old and the age distribution is positively (right-) skewed.
+-   Other variables are quite normally distributed, but "points" is slightly negatively/left skewed in both gender, attitude and deep questions left-skewed, and surf questions slightly right-skewed in males.
+-   There are some outliers in attitude (males), deep, and points (females). As the age distribution is so wide and skewed, there seem to be statistical (not true) outliers in age.
+-   There are some statistically significant correlations between
+    -   Attitude and surf in males (neg.)
+    -   Attitude and total points overall and separately in both genders (pos.)
+    -   Deep and surf in males and overall (neg., not separately in females)
+    -   Stra and Surf overall (neg., not separately in each gender)
+
+```{r}
+# ...and show summaries of the variables in the data.
+summary(lrn14)
+
+# see the exact number of males and females
+library(tidyverse)
+lrn14 %>% 
+ count(gender)
+```
+
+```{r}
+# 3. Regression model
+
+# 3.1 Linear model with explanatory variables: attitude, stra and surf, output/dependent variable: points
+
+my_model1 <- lm(points ~ attitude + stra + surf, data = lrn14)
+summary(my_model1)
+
+```
+
+## Model 1
+
+In this linear regression model the exam points are explained by three variables: attitude, points of Strategic approach and Surface approach.
+
+The intercept refers the value of *y* when *x* = 0. The values below ("Estimate") means the slopes of the each parallel fitted line for each explanatory variable. The asterisk (\*) shows statistically significant (p\< 0.05) relationships.
+
+The residual standard error is the standard deviation of the residuals referring the distance between each observation and the fitted line.
+
+Multiple R-squared and Adjusted R-squared are (multiple) correlation coefficients between the variables measuring the linear correlation between explanatory and dependent variables. The adjusted R-squared is a modified version of R-squared that adjusts for the number of predictors in a regression model.
+
+R-squared means how much (a proportion) the explanatory variables in this model can explain the variance of the outcome variable, which is here the exam points. R-squared can range from 0 to 1. R-squared 1 means that 100 % of the variance seen in the outcome variable can be explained by the explanatory variables. Thus, in the model1 three explanatory variables explain app. 19 % of the total exam points.
+
+However, in this model1 only attitude significantly correlated to the exam points so stra and surf are not very useful or give any additional value in the model.
+
+Let's make a new model:
+
+```{r}
+# 3.2 Explanatory variable: attitude (as it was only with a significant relationship)
+my_model2 <- lm(points ~ attitude, data = lrn14)
+summary(my_model2)
+
+```
+
+## Model 2
+
+As the parameters in the model2 compared to the model 1 are quite similar, we can conclude that in both models attitude is the main explanatory variable predicting the exam points. However, it has only a minor role in the outcome (points) and the model is not very useful for prediction. There seems to be unknown variables that mostly effect the success in the exam.
+
+The R-squared values are slightly lower in the models 2. This is due to the fact that adding a new predictor variable to the model the R-squared will increase even if the predictor variable isn't useful  (ref: <https://www.statology.org/multiple-r-vs-r-squared/>).
+
+```{r}
+# We can also plot the new model:
+library(ggplot2)
+
+ggplot(lrn14, aes(attitude, points))+
+  geom_point()+
+  geom_smooth(method = "lm", se=FALSE)+
+  theme_bw()+
+  annotate("text", x=45, y=16, label="Adj. R^2: 0.1856")+
+  annotate("text", x=45, y=14, label= "p-value: 4.119e-09")
+```
+
+```{r}
+#4 Produce the following diagnostic plots: Residuals vs Fitted values, Normal QQ-plot and Residuals vs Leverage. Explain the assumptions of the model and interpret the validity of those assumptions based on the diagnostic plots
+
+par(mfrow = c(2,2))
+plot(my_model2, which = c(1,2,5))
+
+```
+
+## Interpretation of model validity 
+
+Linear regression modelling has four main assumptions:
+
+1.  Linear relationship between predictors and outcome;
+2.  Independence of residuals;
+3.  Normal distribution of residuals;
+4.  Equal variance of residuals.
+
+*Harrison & Pius, 2021. R for Health Data Science.*
+
+**Residuals vs. Fitted** plot is used to check the assumptions 1-2 and 4:  
+A horizontal line closed to 0 is an indicator of a linear relationship and the residuals do not show any fitted pattern. This seems to be fine in the model 2.
+
+**Q-Q Residuals** to check the 3. assumption:  
+Residuals are normally distributed when all plots follow approximately the reference line. The model2 shows quite good but not optimal as there are some dispersion at the extreme ends.
+
+**Residuals vs. Leverage** plot can show outliers or those values that have a strong influence in a regression model.  
+The model2 does not show clear outlying observations and there are no observations which remarkably exceed the Cook's distance (= observations with a high influence).
+
+
+In summary, based on the results presented above it can be concluded that 
+- there is a linear and positive relationship between the attitude and the total points in an exam
+- attitude explains app. 19 % of the variance in exam points, and
+- the linear regression model (model2) is valid.
