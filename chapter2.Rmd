@@ -4,7 +4,7 @@
 
 *More information on the data is found here: <https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt>*
 
-During this second week I have got familiar with the basics of linear regression and R tools/functions for linear regression modelling. Linear regression itself was not any new method for me but this was probably my first regression analysis I have done in R by myself. Plotting functions for graphical overview of the data were new for me, and they are quite useful! Also different plots for exploring the validity of regression models are something to remember.  
+During this second week I have got familiar with the basics of linear regression and R tools/functions for linear regression modelling. Linear regression itself was not any new method for me but this was probably my first regression analysis I have done in R by myself. Plotting functions for graphical overview of the data were new for me, and they are quite useful! Also different plots for exploring the validity of regression models are something to remember.
 
 In general, linear regression modelling seems to be quite straightforward at least with this kind of "simple" and tidy data.
 
@@ -48,7 +48,7 @@ p1 #show the graphics
 -   Most students are around 20 years old and the age distribution is positively (right-) skewed.
 -   Other variables are quite normally distributed, but "points" is slightly negatively/left skewed in both gender, attitude and deep questions left-skewed, and surf questions slightly right-skewed in males.
 -   There are some outliers in attitude (males), deep, and points (females). As the age distribution is so wide and skewed, there seem to be statistical (not true) outliers in age.
--   There are some statistically significant correlations between (all * are not visible in the matrix as I wasn't able to fix the font properly, sorry!)
+-   There are some statistically significant correlations between (all \* are not visible in the matrix as I wasn't able to fix the font properly, sorry!)
     -   Attitude and surf in males (neg.)
     -   Attitude and total points overall and separately in both genders (pos.)
     -   Deep and surf in males and overall (neg., not separately in females)
@@ -78,7 +78,7 @@ summary(my_model1)
 
 In this linear regression model the exam points are explained by three variables: attitude, points of Strategic approach and Surface approach.
 
-The intercept refers the value of *y* when *x* = 0. When there are multiple explanatory variable, it is the mean value of response variable when all x = 0. The values below ("Estimate") means the slopes of the each parallel fitted line for each explanatory variable. Values >0 refers positive relationship and <0 negative relationship. E.g. higher points in attitude increases the predicted amount of points in the exam. The asterisk (\*) shows statistically significant (p\< 0.05) relationships.
+The intercept refers the value of *y* when *x* = 0. When there are multiple explanatory variable, it is the mean value of response variable when all x = 0. The values below ("Estimate") means the slopes of the each parallel fitted line for each explanatory variable. Values \>0 refers positive relationship and \<0 negative relationship. E.g. higher points in attitude increases the predicted amount of points in the exam. The asterisk (\*) shows statistically significant (p\< 0.05) relationships.
 
 The residual standard error is the standard deviation of the residuals referring the distance between each observation and the fitted line.
 
@@ -101,7 +101,7 @@ summary(my_model2)
 
 As the parameters in the model2 compared to the model 1 are quite similar, we can conclude that in both models attitude is the main explanatory variable predicting the exam points. However, it has only quite a minor role in the outcome (points) and the model is not very useful for prediction. There seems to be unknown variables that mostly effect the success in the exam.
 
-The R-squared values are slightly lower in the models 2. This is due to the fact that adding a new predictor variable to the model the R-squared will increase even if the predictor variable isn't useful  (ref: <https://www.statology.org/multiple-r-vs-r-squared/>).
+The R-squared values are slightly lower in the models 2. This is due to the fact that adding a new predictor variable to the model the R-squared will increase even if the predictor variable isn't useful (ref: <https://www.statology.org/multiple-r-vs-r-squared/>).
 
 ```{r}
 # We can also plot the new model:
@@ -125,7 +125,7 @@ plot(my_model2, which = c(1,2,5))
 
 ```
 
-## Interpretation of model validity 
+## Interpretation of model validity
 
 Linear regression modelling has four main assumptions:
 
@@ -136,17 +136,16 @@ Linear regression modelling has four main assumptions:
 
 *Harrison & Pius, 2021. R for Health Data Science.*
 
-**Residuals vs. Fitted** plot is used to check the assumptions 1-2 and 4:  
+**Residuals vs. Fitted** plot is used to check the assumptions 1-2 and 4:\
 A horizontal line closed to 0 is an indicator of a linear relationship and the residuals do not show any fitted pattern. This seems to be fine in the model 2.
 
-**Q-Q Residuals** to check the 3. assumption:  
+**Q-Q Residuals** to check the 3. assumption:\
 Residuals are normally distributed when all plots follow approximately the reference line. The model2 shows quite good but not optimal as there are some dispersion at the extreme ends.
 
-**Residuals vs. Leverage** plot can show outliers or those values that have a strong influence in a regression model.  
+**Residuals vs. Leverage** plot can show outliers or those values that have a strong influence in a regression model.\
 The model2 does not show clear outlying observations and there are no observations which remarkably exceed the Cook's distance (= observations with a high influence).
 
-
-In summary, based on the results presented above it can be concluded that 
-- there is a linear and positive relationship between the attitude and the total points in an exam
-- attitude explains app. 19 % of the variance in exam points, and
-- the linear regression model (model2) is valid.
+In summary, based on the results presented above it can be concluded that\
+- there is a linear and positive relationship between the attitude and the total points in an exam\
+- attitude explains app. 19 % of the variance in exam points, and\
+- the linear regression model (model2) is (technically) valid but not very useful in predicting exam points based on attitude.
