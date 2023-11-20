@@ -1,0 +1,297 @@
+# Logistic regression
+
+This week I felt lacking time to go through everything properly. I would like to have all these tibbles in tidy tables to have clearer output but I wasn't able to do it now. 
+
+## About the data
+
+```{r}
+setwd("C:/Users/ainopii/Documents/IODS/IODS-project/data/")
+library(readr)
+
+# reading the data for analysis
+alc <- read_csv("student alc.csv", col_names = TRUE)
+
+#printing column names
+colnames(alc)
+# dim(alc) #additional to check the total number of rows and columns.
+
+```
+
+Student alc -data contains joined data from two data sets from <https://www.archive.ics.uci.edu/dataset/320/student+performance>
+
+Data includes 370 observations and 35 variables including demographics, background variables, data on alcohol use, school grades and absences. The average amount of absences and failures at school and average school grades (G1, G2, G3) have been calculated based on the values in two original data sets. Averaged weekly alcohol use (alc_use) has been calculated based on total alcohol consumption during weekdays and weekend. High alcohol use means alc_use > 2 (ranked by 1 - very low to 5 - very high)).
+
+## Exploring the data
+
+```{r}
+#Visualizing the data with a bar plot of each variable
+
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+theme_set(theme_light()) #changing the default theme for plots
+
+# Using gather() function to create key(=each column/variable)-value(=observations) pairs and then plot each pairs with ggplot().
+gather(alc) %>%
+  ggplot(aes(value)) + facet_wrap("key", scales = "free") +
+  geom_bar()
+
+```
+
+```{r}
+# Exploring the age and sex distributions in more details
+alc %>% group_by(sex, high_use) %>% 
+  summarise(count = n(), mean(age), min(age), max(age), sd(age)) %>% 
+  mutate(count_sex = sum(count),
+         percentage = (count/count_sex))
+  
+alc %>% ggplot(aes(x=age, fill=sex))+
+  geom_bar()
+
+```
+
+As seen in the bar plots, the data consists of school, family, health and free time related data on boys and girls mostly 15-18 years old. There seems to a bit more girls (n=195) than boys (n=175) with the similar age distributions (expect of a couple of older boys).
+
+The overview summary graph shows that there are unequal group sizes in many binomial variables. This should be consider in further analysis as logistic regression models using imbalanced data tend to be biased towards the majority class. Therefore, we might select the binomial variables with more equal group size, e.g. "activities", "sex", and "paid". To note, minority of students belong to the high alcohol use (the outcome variable) -group: 21 % of girls and 40 % of boys.
+
+This analysis **aims** to study relationships between high/low alcohol consumption and **1) sex 2) current health status (health) 3) quality of family relationships (famrel) and 4) final grade (G3)**
+
+I hypothesize that\
+1) boys use (slightly) more alcohol than girls\
+2) students who feels healthier (higher "health") may consume less alcohol\
+3) students who are using more alcohol ("high_use"=TRUE) have more problems in their family relationships (lower famrel)\
+4) students using more alcohol have lower final grades.\
+
+```{r}
+# Exploring distribution of high alcohol use, sex, current health and family relationships.
+alc %>% group_by(high_use) %>% 
+  summarise(count = n(), mean(G3), mean(health), mean(famrel)) %>% 
+  mutate(total = sum(count),
+         percentage = (count/total))
+
+# the same with grouping by sex
+alc %>% group_by(sex, high_use) %>% 
+  summarise(count = n(), mean(G3), mean(health), mean(famrel))
+```
+In general, 30 % of students belongs to the high_use group. The mean final grade the quality of family relationships are a bit lower in the high users groups as expected. Contrary to hypothesis, the current health status seems to be better in the high users -group. This might be affected by confounding factors, such as attitudes (towards drinking) and age-related issues, relationships with friends and freetime activities. Additionally, adolescents may ignore the negative side effects of drinking.
+
+There seems to be differences between boys and girls in most variables, so it is important to consider the sex as an explanatory variable. 
+
+```{r}
+# Exploring relationship of high alcohol use, sex, current health and family relationships.
+
+theme_set(theme_light()) #changing the default theme for plots
+library(ggpubr) #to combine all plots into one plot
+
+# create a bar plot of high use and sex
+p1 <- alc %>% 
+  ggplot(aes(x= high_use, fill = sex))+
+  geom_bar()+
+  xlab("high alcohol use")
+
+# create a box plot of high use and health status, grouped by gender
+p2 <- alc %>% 
+  ggplot(aes(x= high_use, y=health, col= sex))+
+  geom_boxplot()+
+  xlab("high alcohol use")+
+  ylab("current health status")
+  
+# create a box plot of high use and quality of family relationships, grouped by gender
+p3 <- alc %>% 
+  ggplot(aes(high_use, y= famrel, col= sex))+
+  geom_boxplot()+
+  xlab("high alcohol use")+
+  ylab("quality of family relationships")
+
+# create a box plot of the high_use and the final grade, grouped by gender
+p4 <- alc %>% 
+  ggplot(aes(x= high_use, y = G3, col= sex))+
+  geom_boxplot()+
+  ylab("final grade")+
+  xlab("high alcohol use")
+
+# combining and adjusting all plots in the same figure using ggarrange() in ggpubr.
+ggarrange(p1, p2, p3, p4,
+          labels = c("1", "2", "3", "4"),
+           ncol = 2, nrow = 2,
+          common.legend = TRUE,
+          legend = "left",
+          vjust = 1, hjust = 0.5)
+
+```
+
+The summary of distributions of the outcome (high_use) and explanatory variables shows that **boys** are more likely to consume more alcohol than girls as expected.
+
+**Final grade** does not notably seem to differ in girls who drink more vs. less alcohol but boys consuming more alcohol have lower final grades (as expected). There are four boys in high user -group with very low grade (considered as outliers in the plot). However, distribution of the final grade is large also in other boys.
+
+There are overall no big differences in the current **health status** based on the alcohol consumption. Boys have reported a slightly better health status compared to girls. Sex differences in health status could be explained by the fact that girls have more mental health problems in adolescence in general. Additionally, the box plot shows that distribution of health status is wider in girls, and girls consuming more alcohol have reported better health status compared to girls using less alcohol. Thus, the overall difference seen in the link between alcohol use and health is origin from the differences seen in girls specifically. To note, the middle line in the box plot refers the median and the box includes 50 % of observations. The summary tibble above includes mean values. Therefore, one could do opposite conclusions of sex differences in health if only look at the summary table.
+
+The quality of **family relationships** seems to be a bit lower in those who drink more alcohol, as expected. There seems to be no sex differences. It can be speculated whether poor family relationships increase the tendency to use more alcohol or vice versa. Probably there are several factors affecting both issues.
+
+```{r}
+# additional way to tabulate data to check relationships between explanatory and outcome variables
+library(finalfit)
+
+dependent <- "high_use"
+explanatory <- c("sex", "health", "famrel", "G3")
+alc %>% 
+  summary_factorlist(dependent, explanatory, p = TRUE,
+                     add_dependent_label = TRUE)
+```
+Sex, family relationship and final grade show statistically significant relationship with high alcohol use.
+
+## Logistic regression model
+
+```{r}
+# Extra: checking the assumption of Multicollinearity: explanatory variables should not correlate with each others.
+library(GGally)
+
+alc %>% 
+  remove_labels() %>%  # ggpairs doesn't work well with labels
+  ggpairs(columns = explanatory, mapping = aes(col = sex, alpha = 0.4))
+```
+
+There are statistically significant correlation between the final grade and health. As health does not show statistically significant relationship with high alcohol use, it could be removed from the analysis. However, let's not continue with all explanatory variables...
+
+```{r}
+library(tidyverse)
+
+# logistic regression model 
+
+m1 <- glm(high_use ~ sex + health + famrel + G3, data = alc, family = "binomial")
+
+# print out a summary of the model
+summary(m1)
+
+# print out the coefficients of the model
+coef(m1)
+```
+The model summary shows that sex, family relationship and final grade (G3) but not health status have statistically significant relationships with high alcohol use. Male sex has positive correlation and both family relationship and final grade have negative correlations with higher alcohol consumption. These results are in line with the plotting results. Sex seems to have strongest and also the most significant correlation while the final grade has only a minor effect (|Estimate| i.e. the slope is small).
+
+```{r}
+# compute odds ratios (OR)
+OR <- coef(m1) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(m1)
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+```
+Odds ratios (OR) above 1 indicates that the event (here high alcohol use) is more likely to occur when sex = Male or continuous predictor increases. So, boys are about 2.6-times likely to be high consumers than girls.
+
+Family relationships and final grade have ORs < 0 meaning that high alcohol use is less likely to occur if these variables increase. For example, one unit increase in the quality of family relationship in the Likert scale decreases app. 30 % of the odds to high alcohol consumption.
+
+As the odds for Health is close to 1, there is no real association between the health status in general and alcohol consumption.
+
+Confidence interval 95 % means that the value of the odds ratio for the population is with 95 % confident within this range. For example for sex, (0.49274622, 1.44214153).
+
+These results further support the previous results.
+
+```{r}
+# Exploring the predictive performance of the model.
+
+# Statistically significant explanatory variables: sex, famrel, final grade
+library(dplyr)
+
+# predict() the probability of high_use
+probabilities <- predict(m1, type = "response")
+
+# add the predicted probabilities to 'alc' as a new variable
+alc <- mutate(alc, probability = probabilities)
+
+# use the probabilities to make a prediction of high_use
+alc <- mutate(alc, prediction = probability > 0.5)
+
+# see the first ten original classes, predicted probabilities, and class predictions
+select(alc, famrel, G3, sex, high_use, probability, prediction) %>% head(10)
+
+# tabulate the target variable versus the predictions
+table(high_use = alc$high_use, prediction = alc$prediction)
+```
+The cross table shows that if a student is not a high user, the predictions is mostly correct, but most high users are predicted inaccurately in non-high users. This is also seen in the plot below.
+
+```{r}
+# plotting the true and predicted values for "high use"
+
+plot_m1 <- ggplot(alc, aes(x = probability, y = high_use, col = prediction)) +
+  geom_point()
+
+plot_m1
+```
+
+
+```{r}
+# Computing the total proportion of inaccurately classified individuals
+# define a loss function (mean prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# call loss_func to compute the average number of wrong predictions in the (training) data
+loss_func(class = alc$high_use, prob = alc$probability)
+```
+As already expected based on the cross-table, the total proportion of inaccurate predictions is quite big: 30 %. Most of students in high use -group have inaccurate prediction but the model can predict quite well and accurately those who are not in the high use group.
+
+All assumptions, for example *linearity of continuous variables to the response*, for logistic regression were not explored and those can affect the model performance. In addition, final grade showed relationship with alcohol consumption only in boys. There might be some interaction between these explanatory variables that decrease the predictive performance of the model.
+
+## Bonus tasks
+*Bonus* 
+
+```{r}
+# 10-fold cross validation
+library(boot)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m1, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+The performance is not really different, still 29 % of wrong predictions.
+
+*Super-Bonus*
+
+```{r}
+# Model 2 with more significant predictors
+
+# logistic regression model 
+
+m2 <- glm(high_use ~ sex + famrel + failures + absences, data = alc, family = "binomial")
+
+# print out a summary of the model
+summary(m2)
+```
+
+```{r}
+# compute odds ratios (OR)
+OR2 <- coef(m2) %>% exp
+
+# compute confidence intervals (CI)
+CI2 <- confint(m2)
+
+# print out the odds ratios with their confidence intervals
+cbind(OR2, CI2)
+
+# predict() the probability of high_use in model 2
+probabilities <- predict(m2, type = "response")
+
+# add the predicted probabilities to 'alc' as a new variable
+alc2 <- mutate(alc, probability = probabilities)
+
+# use the probabilities to make a prediction of high_use
+alc2 <- mutate(alc, prediction = probability > 0.5)
+
+# tabulate the target variable versus the predictions
+table(high_use = alc2$high_use, prediction = alc2$prediction)
+```
+
+```{r}
+# 10-fold cross validation
+library(boot)
+cv2 <- cv.glm(data = alc2, cost = loss_func, glmfit = m1, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv2$delta[1]
+```
+
+It's worse than the first model.
