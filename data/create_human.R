@@ -1,4 +1,4 @@
-# Aino-Kaisa Piironen
+# Aino-Kaisa Piironen, 25.11.2023
 # Data wrangling for Assignment 4 in the Introduction to Open Data Science Course
 
 library(readr)
