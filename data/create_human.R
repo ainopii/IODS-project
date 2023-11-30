@@ -76,3 +76,48 @@ str(human) # check the data structure
 library(readr)
 
 write_csv(human, "human.csv") # working directory was already set in the IODS data folder.
+
+# 30.11.2023, Aino-Kaisa Piironen
+# Continuing data pre-processing.
+
+library(readr)
+library(dplyr)
+
+# read "human" data
+human <- read_csv("human.csv")
+
+str(human)
+dim(human)
+colnames(human)
+
+# The human data includes 195 observations of 19 variables. 
+# It has numerical values of Human Development index (HDI) and Gender Inequality index (GII) for 19 different Country.
+# These index measures have been calculated based on the other indicator measurements available in data.  
+# More information can be found in <https://hdr.undp.org/system/files/documents/technical-notes-calculating-human-development-indices.pdf>
+# Additionally, data has two newly created variables: "edu2.FM = Edu2.F / Edu2.M and Labo.FM" = Labo.F / Labo.M
+# Each variable and their short names have been listed above (check rows 39-56).
+
+# Exclude unneeded variables:
+
+keep <- c("Country", "Edu2.FM", "Labo.FM", "Edu.Exp", "Life.Exp", "GNI", "Mat.Mor", "Ado.Birth", "Parli.F")
+
+human <- dplyr::select(human, one_of(keep)) # now we have 195 observations of 9 variables 
+
+# Remove all rows with missing values.
+
+human_new <- filter(human, complete.cases(human)) # 162 observations left
+
+# Remove the observations which relate to regions instead of countries.
+
+print(human_new$Country)
+tail(human_new, 10)
+# we can see that 7 last rows are not countries but regions. Let's remove these.
+
+human_new <- human_new[1:(nrow(human_new) - 7),]
+tail(human_new, 10)
+colnames(human_new)
+
+# The data have now 155 observations and 9 variables (including the "Country" variable).
+# Save the human data.
+
+write_csv(human_new, "human.csv")
